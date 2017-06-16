@@ -1,0 +1,83 @@
+---
+title: "DataFest2017"
+author: "Maggie Carttar"
+date: "4/1/2017"
+output: html_document
+---
+# Load Packages, Data
+```{r}
+library(lubridate)
+library(dplyr)
+library(readr)
+mini_clicks_csv <- read_csv("~/Desktop/DataFest2017Data/data/mini_clicks.csv")
+
+```
+# Clean data
+```{r}
+mini_clicks <- mini_clicks_csv %>%
+  mutate(date_time = date(date_time),
+         user_location_latitude = as.numeric(user_location_latitude),
+         user_location_longitude = as.numeric(user_location_longitude),
+         orig_destination_distance = as.numeric(orig_destination_distance),
+         channel = factor(channel),
+         srch_ci = ymd(srch_ci),
+         srch_co = ymd(srch_co),
+         distance_band = factor(distance_band,levels= c("VC","C","M","F","VF")),
+         hist_price_band = factor(hist_price_band, levels = c("VL", "L", "M","H", "VH")),
+         popularity_band = factor(popularity_band, levels = c("VL", "L", "M","H", "VH"))
+  )
+```
+
+
+# Graph proportion of is_mobile to weekday
+```{r}
+mini_clicks%>%
+group_by(weekday = wday(date_time))%>%
+summarize(prop_mobile = mean(is_mobile))%>%
+ggplot(aes(x = weekday, y = prop_mobile)) + geom_line()
+```
+
+
+```{r}
+mini_clicks%>%
+filter(is_booking > 0)%>%
+group_by(weekday = wday(date_time))%>%
+summarize(prop_mobile = mean(is_mobile))%>%
+ggplot(aes(x = weekday)) + geom_line(y = )
+```
+# Create temporary datasets
+```{r}
+browsing <- mini_clicks%>%
+group_by(weekday = wday(date_time))%>%
+summarize(prop_mobile = mean(is_mobile))
+          
+booking <- mini_clicks%>%
+filter(is_booking > 0)%>%
+group_by(weekday = wday(date_time))%>%
+summarize(prop_mobile = mean(is_mobile))
+```
+# Dual graph
+```{r}
+ggplot(alpha = 0.3) + geom_line(data=browsing,aes(x=weekday,y=prop_mobile)) + geom_line(data=booking,aes(x=weekday,y=prop_mobile))
+```
+
+```{r}
+finding_sessions <- mini_clicks%>%
+  arrange(date_time)%>%
+  group_by(user_id)%>%
+  summarise(time_diff = max(date_time)-min(date_time), booked = sum(is_booking))%>%
+  arrange(desc(time_diff))
+  
+
+  
+```
+
+```{r}
+time_until_booked <- mini_clicks %>%
+mutate(date_time = date(date_time))%>%
+group_by(user_id,hotel_country)%>%
+summarize(max_time = max(date_time), min_time= min(date_time), diff_time = (max_time-min_time), booked = sum(is_booking), n=n()) %>%
+filter(n>0)
+```
+
+

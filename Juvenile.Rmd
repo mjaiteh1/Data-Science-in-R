@@ -1,0 +1,26 @@
+---
+title: "Juvenile Capital Punishment"
+author: "Mariama Jaiteh"
+date: "2/15/2017"
+output: html_document
+---
+
+<b> A brief description of the data, including the source </b> 
+
+I'm looking at Capital Punishment for Juveniles in the United States. I was interested in this because capital punishment for juveniles existed until 2005 So I wanted to know which states were involved and how many juveniles were excecuted. I took this data from Wikipedia.
+
+<b> Which tool(s) did you use to get it? To clean it? To analyze it? </b> <br>
+To scrape the data, I used python and I imported the beautiful Soup library and the resquests library. To visualize the data I used Tableau.
+```{python}
+#import requests
+#from bs4 import BeautifulSoup
+```
+<b> What patterns/trends did you find in the data? </b>
+<br>
+![](http://i68.tinypic.com/bjevsk.png) 
+<br>
+When I was looking at the CSV file, I was able to see all the juveniles and the methods that was used to execute them. While looking at that I did miss that 
+Texas had the highest number of juvenile execution. I noticed that Georgia, Louisiana and South Carolina were the only states that used electrocution.
+This is interesting because they are all around each other so it makes sense that they all used electrocution.
+
+<b> Was anything harder than you expected? Easier? </b>

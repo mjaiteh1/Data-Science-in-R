@@ -1,0 +1,94 @@
+---
+title: "Which presidential candidate made the most money?"
+author: "Mariama Jaiteh, Khadidja Fares, and Fatima Keita"
+date: "March 24, 2017"
+output: html_document
+---
+
+
+## Loading the data
+```{r, message=FALSE, cache = FALSE}
+load("candidates.rda")
+load("committees.rda")
+load("contributions.rda")
+load("individuals.rda")
+
+library(tidyverse)
+library(knitr)
+
+#Change candidates committe_id name, so it makes it easier to join with other data files.
+#Candidate identifier across all the data files.
+candidates <- candidates %>%
+  rename(cmte_id = cand_pcc)
+
+```
+
+## Presidential candidates
+```{r, cache = FALSE,message=FALSE}
+
+#Filtering and select the necessary coloums
+cand <- candidates %>%
+  select(cand_id,cand_election_yr,cand_office,cmte_id,cand_name) %>%
+  filter(cand_office == "P") %>%
+  select(-cand_office)
+#individual contributions
+indiv <- individuals %>%
+  select(cmte_id,transaction_amt)
+#committe contributions
+committ <- contributions %>%
+  select(cand_id,transaction_amt)
+
+```
+
+## Join datasets
+```{r, cache = FALSE,message=FALSE}
+#Join function to combine candidates dataset with contribution datasets
+joinFunc <- function(name,joinBy) {
+  cand %>%
+  inner_join(name,by = c(joinBy))
+}
+#Joining
+individual_contri <- joinFunc(indiv,"cmte_id")
+committe_contri <- joinFunc(committ,"cand_id")
+
+#2012 election
+individual_contri <- individual_contri %>%
+  filter(cand_election_yr == "2012")
+
+committe_contri <- committe_contri %>%
+  filter(cand_election_yr == "2012")
+```
+
+## So who made the most money?
+```{r, cache = FALSE,message=FALSE}
+#Summarize(add amt$ for each candidate) and figure out top 10 
+popular_candidate <- function(fileName) {
+  fileName %>%
+  group_by(cand_name) %>%
+  summarise(amt = sum(transaction_amt)) %>%
+  arrange(desc(amt))
+}
+#Top 10 candidates 
+popularIndiv <- popular_candidate(individual_contri)
+popularCommit <- popular_candidate(committe_contri)
+
+top_indiv <- popularIndiv %>% top_n(10,amt)
+top_commit <- popularCommit %>% top_n(10,amt)
+
+```
+<b> <h1>Individual Contributions </h1> </b>
+<br>
+![](http://i63.tinypic.com/1y3brs.png)
+<br>
+<br>
+<b> <h1> Committe Contributions &#42;</h1> </b>
+<br>
+![](http://i63.tinypic.com/vh6q1c.png)
+<br>
+&#42; Doesn't represent the sum of all committe contributions.
+<br>
+<h2>What can we learn from this information?:</h2>
+<h5>From this information, we know that money contributes significantly to the election process in how money is acquired and reallocated.</h5>
+<h1>Background information </h1>
+<h5>By the end of the 2012 election cycle, the top two presidential candidates Barack Obama and Mitt Romney had both raised over $1 billion. To be more specific as of November 26, 2012 Obama had raised a total of $1.123 billion while Romney raised a total of $1.019 billion. The majority of the money raised for both Obama and Romney’s campaigns came from their own personal fundraising. However, in the category of outside spending (that is, money raised either for or against candidates) Romney’s primary Super PAC, Restore Our Future, in collaboration with their affiliates like the National Rifle Association and the Republican National Committee raised a significant amount of money (over $88.6 million) against Obama’s campaign. On the contrary Obama’s primary Super PAC, Priorities USA Action and only one other affiliate raised money(~64.8 million) against Romney. Both candidates spent the majority of this money on advertisements, to be more specific Obama spent more advertising money on television commercials and posters/billboards while Romney spent more advertising money on letters and poster mailing. Romney’s major super PAC donors included: friends of Newt Gingrich billionaire casino owner and physician Sheldon and Mary Adelson ($39.7 million) and former financier Bob Perry ($10 million). Obama’s major super PAC donors consisted of large numbers of donors with smaller donations, the largest donation coming from Chicago mogul and early Obama supporter Fred Eychaner ($5 million). 
+</h5>

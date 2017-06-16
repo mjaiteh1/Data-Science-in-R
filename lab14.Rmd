@@ -1,0 +1,61 @@
+---
+title: "lab14"
+author: "Mariama Jaiteh"
+date: "4/22/2017"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+http://wsgw.mass.gov/data/gispub/shape/contours5k/hp214.zip
+```
+
+```{r}
+url <- "http://wsgw.mass.gov/data/gispub/shape/state/biketrails_arc.zip"
+download.file(url, destfile = basename(url))
+unzip("biketrails_arc.zip", exdir = "biketrails")
+```
+
+```{r}
+library(rgdal)
+dsn <- path.expand("biketrails")
+dsn
+list.files(dsn)
+```
+
+```{r}
+ogrListLayers(dsn)
+```
+
+```{r}
+ogrInfo(dsn,layer="biketrails_arc")
+```
+
+```{r}
+bike_trails <- readOGR(dsn, "biketrails_arc")
+summary(bike_trails)
+```
+
+```{r}
+plot(bike_trails)
+```
+```{r}
+bike_trail_data <- bike_trails %>%
+  as.data.frame()
+```
+
+##Projections
+```{r}
+bbox(bike_trails)
+```
+```{r}
+bike_trails_4326 <- spTransform(bike_trails, CRS("+init=epsg:4326"))
+summary(bike_trails_4326)
+```
+```{r}
+library(leaflet)
+leaflet() %>%
+  addTiles() %>%
+  addPolylines(data = bike_trails_4326)
+```
+

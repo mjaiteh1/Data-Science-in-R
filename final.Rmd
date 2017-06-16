@@ -1,0 +1,151 @@
+---
+title: "Proposal for New Campsites"
+author: "Mariama Jaiteh, Fiona Miller, Starry Zhou"
+date: "4/26/2017"
+output: html_document
+---
+
+## Problem Statement: 
+MacLeish currently has two campsites - one large group site closer to the building and one remote campsite with two tent platforms about one mile from the parking area. We would like to develop one additional campsite that is approximately half a mile walk from the parking area, within 200’ of a stream or other source of water, in forest that is unlike the forest in the two other campsites, relatively flat, and at least 500’ from any research area or any element of the Challenge Course. Propose two new campsite locations for our consideration.
+
+```{r, warning=FALSE, message=FALSE}
+#Load Libraries!
+library(sp)
+library(macleish)
+library(tidyverse)
+library(rgeos)
+library(rgdal)
+library(dplyr)
+library(leaflet)
+
+```
+# 10’ contour elevation data
+```{r, message=FALSE, results='hide', warning=FALSE}
+# Download terrain data for Whatley
+url <- "http://wsgw.mass.gov/data/gispub/shape/contours5k/hp337.zip"
+download.file(url, destfile = basename(url))
+unzip("hp337.zip", exdir = "whately_contours")
+
+# Load and transform
+whately_GIS_data <- path.expand("whately_contours")
+whately_contours <- readOGR(whately_GIS_data, "hp337") %>%
+  spTransform(CRS("+init=epsg:4326"))
+```
+
+```{r, message=FALSE, results='hide', warning=FALSE}
+# Download terrain data for Conway
+url <- "http://wsgw.mass.gov/data/gispub/shape/contours5k/hp68.zip"
+download.file(url, destfile = basename(url))
+unzip("hp68.zip", exdir = "conway_contours")
+
+# Load and transform
+conway_GIS_data <- path.expand("conway_contours")
+conway_contours <- readOGR(conway_GIS_data, "hp68") %>%
+  spTransform(CRS("+init=epsg:4326"))
+```
+
+```{r, message=FALSE, results='hide', warning=FALSE}
+# Merge the contours for both towns, then intersect with the boundary of Macleish
+macleish_contours <-
+  gUnion(conway_contours, whately_contours) %>%
+  gIntersection(macleish_layers[['boundary']])
+remove(whately_contours, conway_contours)
+
+```
+
+```{r, message=FALSE, results='hide', warning=FALSE}
+# intersect lines
+trail_points <- macleish_contours %>%
+  gIntersection(macleish_layers[['trails']])
+```
+# Campsites
+```{r}
+#create data.frame for campsites and parking points
+sites = data.frame( name = c("Group Campsite","Remote Campsite","Parking"), lat = c(42.450976,42.458570,42.448013),long = c(-72.678154,-72.674732,-72.680663))
+```
+# Buffer
+```{r}
+## Buffer for stream (200 ft)
+proj4_aea <- "+proj=aea +lat_1=29.5 +lat_2=42.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+stream <- macleish_layers[["streams"]] %>%
+  spTransform(CRS(proj4_aea)) %>%
+  gBuffer(width = 60.96) %>%
+  spTransform("+init=epsg:4326")
+
+```
+
+```{r}
+## Buffer on Challenge courses (500 ft)
+challenge <- macleish_layers[["challenge_courses"]] %>%
+  spTransform(CRS(proj4_aea)) %>%
+  gBuffer(width = 152.4) %>%
+  spTransform("+init=epsg:4326")
+```
+
+```{r}
+## Buffer on research projects (500ft)
+research <- macleish_layers[["research"]] %>%
+  spTransform(CRS(proj4_aea)) %>%
+  gBuffer(width = 152.4) %>%
+  spTransform("+init=epsg:4326")
+```
+
+```{r}
+#transform to aea
+boundaries_aea <- macleish_layers[["boundary"]] %>%
+  spTransform(CRS(proj4_aea))
+```
+# Plot map
+```{r}
+## plot map with all information
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = macleish_layers[["buildings"]], 
+              weight = 1, popup = ~ name, color = "brown") %>%
+  addPolygons(data = macleish_layers[["forests"]], 
+              weight = 1, fillOpacity = 0.2, popup = ~ Sheet1__Na, color = "green") %>%
+  addMarkers(lng = ~long, lat = ~lat, data = sites,
+    popup = ~name)  %>%
+  addPolygons(data = stream, color = "blue") %>%
+  addPolygons(data = research, color = "purple") %>%
+  addPolygons(data = macleish_layers[["boundary"]], color = "black") %>%
+  addPolygons(data = challenge, color = "yellow") %>%
+  addCircles(lat = 42.448013, lng = -72.680663, radius = 804.672,color="white") %>%
+  addPolylines(data = macleish_contours, weight = 1, color = "black") %>%
+  addPolylines(data = macleish_layers[["trails"]], weight = 3, color = "red") %>%
+  addCircleMarkers(data = trail_points, radius = 2, color = "red") %>%
+  addMarkers(lng = -72.674573, lat = 42.449111,popup = "Potential Campsite # 1")%>%
+    addMarkers(lng = -72.685897, lat = 42.454397,popup = "Potential Campsite # 2")
+```
+
+```{r}
+#map with less information, just markers and forest
+leaflet() %>%
+  addTiles() %>%
+    addMarkers(lng = ~long, lat = ~lat, data = sites,
+    popup = ~name) %>%
+  addPolygons(data = macleish_layers[["forests"]], 
+              weight = 1, fillOpacity = 0.2, popup = ~ Sheet1__Na, color = "green") %>%
+  addMarkers(lng = -72.674573, lat = 42.449111,popup = "Potential Campsite # 1") %>%
+    addMarkers(lng = -72.685897, lat = 42.454397,popup = "Potential Campsite # 2")
+```
+
+## Data Used:
+We used data from the macleish package, specifically, the forests, boundary, buildings, trails, streams, research, and challenge courses data. We also used the elevation data provided by Massachusetts government for Whatley and Conway.To draw the map and to determine where we were going to place the new campsites, we decided to plot all the layers and buffers that we had but we put different colors for each. From this we were able to tell in which areas we can put the campsites.
+
+## What we found:
+Two potential campistes for MacLeish Field Station. Potential campsite #1 is located at 42.449111, -72.674573 in the vegetation type Vernal Pool Sedge Meadow, and Potential Campsite #2 is located at 42.454397,-72.685897 in the vegetation type Red Oak.
+
+## Actionable recommedations:
+Now that we have identified the two potential campsites,I think the best thing Smith should do is to scope out the area, we know that the campsites meets the requirements listed in the problem description but we're not quite sure if it violates any laws and rules. I know that there is a potential that the new potential campsites are areas where there are endangered species. 
+
+## Necessary resources for implementation:
+Expected cost: $10,000 to $50,000
+Expected construction time: one month
+Concerns/issues that should be considered with more conditions: 
+1. The State of Massachusetts has regulations for campground and camp sites. If we want to start a campsite, we need to apply for campground operating license and deal with paperwork.
+2. Camping has environmental impacts including: visitors leaving trash; interfere the lives of wild animals; destroy plants, etc.
+
+(References: https://startupjungle.com/start-campground-business/,
+http://www.mass.gov/eea/agencies/dcr/massparks/recreational-activities/massparks-camping-info-generic.html,
+http://visual.ly/10-ways-minimize-environmental-impact-camping-other-outdoor-activities)

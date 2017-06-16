@@ -1,0 +1,25 @@
+---
+title: "Newark New Jersey Crime Rate"
+author: "Khadidja Fares"
+date: "2/8/2017"
+output: html_document
+---
+What is the data that’s being visualized? Where did it come from?
+
+The data that is being visualized came from the New York Times article titled, "Murder Rates Rose in a Quarter of the Nation's 100 Largest Cities" Murder rates rose considerably in 25 of the nation’s 100 largest cities last year, according to an analysis by The New York Times of new data compiled from individual police departments. 
+
+Which data dimensions are mapped to which visual dimensions?
+
+It shows that the murder rate rose 11 percent across the United States in 2015, jumping more in 2014 than it had in nearly half a century. In the visual dimensions, the Times shows that half of the increase in homicides came from just seven cities: Baltimore, Chicago, Cleveland, Houston, Milwaukee, Nashville, and Washington. Chicago had the most homicides with 488 in 2015 more than the 352 in New York City, which has three times as many people. Baltimore had the largest increase 133 more than 2014 and the second highest rate in 2015, after Saint Louis, which had 59 homicides per 100,000 residents.
+
+How does this shape your understanding of the data?
+
+The data definitely indicates that the crime rate in Chicago was the most significant. But the data also made me realize that nationally, homicides rates are still much lower than they were in the 1990s, even among the seven cities that drove 2015 increased. Also, in 2015 Balitimore’s murder rate not only increased the among the 100 top cities but it also reached a historical high of 55 homicides per 100,000 residents. That is in comparison to the previous record high was in 19993 when the rate was 48.  
+
+If you liked the visualization: what is it doing well?
+
+I did like how the visualization indicated that it received its data from FBI reports and indicated that most of the cities have also been embroiled in protests after police involved deaths of black makes like Freddie Gray in Baltimore, Laquan McDonald in Chicago and Tamir Rice in Cleveland. The visualization was simple but could have used more color, graphics, and could be more interactive with the readers. 
+
+If you disliked the visualization: what would you change?
+
+I disliked how the author used arrows that rose from the map of the U.S. to show which cities had the most crime rate. The visualization could have used more color and it was lacking in the eye catching aspect since it was a white map of the us and all the arrows were red. I wish that the New York Times would spend more time on the Black Lives Matter movement graphics and visuals in comparison to the elections visualizations. 

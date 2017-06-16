@@ -1,0 +1,41 @@
+---
+title: 'Hate Crimes pre-election and post-election'
+author: "Mariama Jaiteh and Fatima Keita"
+date: "2/15/2017"
+output: html_document
+---
+
+```{r }
+library(dplyr)
+library(readr)
+hate_crimes <- read_csv("C:/Users/Fatima/Desktop/SDS 192/hate_crimes.csv.csv")
+
+ subset <- hate_crimes[which(hate_crimes$state == "Washington" || hate_crimes$state == "Oregon" || hate_crimes$state == "Wisconsin" || hate_crimes$state == "Texas" || hate_crimes$state == "Illinios"|| hate_crimes$state == "Maine" || hate_crimes$state == "New York" || hate_crimes$state == "Washington D.C." || hate_crimes$state == "Massachusetts" ||hate_crimes$state == "California")]
+```
+ 
+```{r}
+ which(hate_crimes$state == "Washington")
+ 
+ subset <- hate_crimes %>%
+   filter(state %in% c("Massachusetts", "Washington"))
+```
+ 
+```{r}
+library(ggplot2)
+library(ggthemes)
+library(RColorBrewer)
+
+plot <- ggplot(subset, aes(x = hate_crimes$state, y= hate_crimes$median_household_income))
+plot + geom_point()
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

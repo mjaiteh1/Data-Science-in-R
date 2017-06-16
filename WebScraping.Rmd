@@ -1,0 +1,68 @@
+---
+title: "WebScraping"
+author: "Mariama Jaiteh"
+date: "3/6/2017"
+output: html_document
+---
+
+```{r }
+library(tidyverse)
+library(rvest)
+url <- "http://www.the-numbers.com/box-office-records/domestic/all-movies/weekend/opening"
+
+tables <- html_bom %>%
+  html_nodes("table")
+tables
+
+tables[[5]]
+
+```
+
+
+```{r}
+movies <- tables[[5]] %>%
+  html_table(header = TRUE)
+glimpse(movies)
+
+```
+```{r}
+movies <- movies %>%
+  mutate(opening = parse_number(`Opening*`)) %>%
+  mutate(percent_total = parse_number(`% of Total`)/100)
+glimpse(movies)
+```
+
+```{r}
+movies %>%
+  select(`Date**`) %>%
+  glimpse
+
+```
+
+```{r}
+install.packages("lubridate")
+require(lubridate)
+movies <- movies %>%
+  mutate(release_date = mdy(`Date**`))
+glimpse(movies)
+```
+
+```{r}
+library(scales)
+movie_plot <- ggplot(data = movies, 
+                     aes(x = release_date, y = opening)) + 
+  # We want a scatterplot, and we'll use both color and size to show percent_total
+  geom_point(aes(color = percent_total, size = percent_total)) +
+  
+  # Clever trick to combine color and size into a single legend
+  guides(color = guide_legend(), size = guide_legend(), title = "Percent Total") +
+  
+  # Format the y-axis to show $ amount
+  scale_y_continuous(labels = dollar) +
+  
+  # Label our axes
+  xlab("Release Date") +
+  ylab("Opening Day Gross")
+movie_plot
+```
+

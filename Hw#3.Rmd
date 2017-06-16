@@ -1,0 +1,35 @@
+---
+title: "Unisex Name?"
+author: "Mariama Jaiteh and Fatima Keita"
+date: "Due: 3/10/2017"
+output: html_document
+---
+<br>
+```{r message=FALSE}
+library(tidyverse)
+library(babynames)
+
+ratio <- function(name_arg) {
+ babynames %>%
+    filter(name == name_arg & year >=1930 & year <2012) %>%
+    group_by(year) %>%
+    summarize(N=n(),
+              total = sum(n),
+              girls = sum(ifelse(sex == "F",n,0))) 
+}
+
+```
+
+```{r message=FALSE}
+jplot <- ggplot(data=ratio("Jessie"), aes(x=year, y=(girls/total)*100)) +
+  geom_area(fill ="#E9AB9D") +
+  geom_line()
+
+jplot + scale_x_continuous("",breaks=c(1940,1960,1980,2000),expand = c(0,0), labels=c("1940","'60","'80","2000")) +  scale_y_continuous("",limits = c(0,100),breaks = c(0,50,100),labels= c("0%","50%","100%"),expand = c(0,0)) +
+  ggtitle("1.Jessie") +  theme_bw() + theme(panel.grid = element_blank(), panel.border = element_blank(),panel.background = element_rect(fill = "#92BBD1"), plot.title = element_text(face = "bold",size = 16),axis.text=element_text(size=16),axis.ticks.y=element_blank()) + annotate("text", x=2000, y=80, label= "BOYS",colour= "white",size=7) + annotate("text", x=2000, y=20, label= "GIRLS",colour = "white",size=7)
+
+
+```
+
+
+

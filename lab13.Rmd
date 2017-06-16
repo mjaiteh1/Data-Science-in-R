@@ -1,0 +1,95 @@
+---
+title: "Lab 13"
+author: "Mariama Jaiteh"
+date: "4/19/2017"
+output: html_document
+---
+
+```{r}
+library(macleish)
+```
+
+```{r}
+names(macleish_layers)
+```
+##Spatial Data
+```{r}
+library(sp)
+macleish_layers[["buldings"]] %>%
+  summary()
+```
+
+```{r}
+macleish_layers[["buildings"]] %>%
+  plot()
+```
+
+```{r}
+macleish_layers[["landmarks"]] %>%
+  summary()
+```
+```{r}
+?macleish_layers
+
+```
+
+```{r}
+vignette("macleish")
+```
+
+```{r}
+macleish_layers[["streams"]] %>%
+  summary()
+```
+
+```{r}
+macleish_layers[["streams"]] %>%
+  plot()
+
+
+```
+##Weather data
+```{r}
+mac <- etl("macleish") %>%
+  etl_update()
+whately <- mac %>%
+  tbl("whately") %>%
+  collect(n=Inf)
+
+
+```
+
+```{r}
+orchard <- mac %>%
+  tbl("orchard") %>%
+  collect(n=Inf)
+
+```
+
+##Leaflet
+```{r}
+bechtel <- data.frame(lat = 42.449167, lon = -72.679389,name = "Betchtel Environmental Classroom")
+```
+
+```{r}
+library(leaflet) %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = ~lon, lat= ~lat,data= bechtel, popup = ~name)
+
+```
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  addMarkers(lng = ~lon, lat = ~lat, data = bechtel, 
+    popup = "Bechtel Environmental Classroom") %>%
+  addPolygons(data = macleish_layers[["buildings"]], 
+              weight = 1, popup = ~ name) %>%
+  addPolygons(data = macleish_layers[["forests"]], 
+              weight = 2, fillOpacity = 0.2, popup = ~ Sheet1__Na)
+```
+
+```{r}
+
+

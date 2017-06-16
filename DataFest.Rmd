@@ -1,0 +1,48 @@
+---
+title: "DataFest"
+author: "Mariama Jaiteh"
+date: "3/31/2017"
+output: html_document
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+library(lubridate)
+mini_clicks <- read_csv("~/Desktop/DataFest2017Data/data/mini_clicks.csv")
+
+clicks <- read_csv("~/Desktop/DataFest2017Data/data/clicks.csv")
+
+
+
+```
+..
+```{r}
+mini_clicks_clean <- mini_clicks %>%
+  mutate(date_time = date(date_time),
+         user_location_latitude = as.numeric(user_location_latitude),
+         user_location_longitude = as.numeric(user_location_longitude),
+         orig_destination_distance = as.numeric(orig_destination_distance),
+         channel = factor(channel),
+         srch_ci = mdy(srch_ci),
+         srch_co = mdy(srch_co),
+         distance_band = factor(distance_band,levels= c("VC","C","M","F","VF")),
+         hist_price_band = factor(hist_price_band, levels = c("VL", "L", "M","H", "VH")),
+         popularity_band = factor(popularity_band, levels = c("VL", "L", "M","H", "VH")),
+         trip_duration = srch_co - srch_ci,
+         time_from = srch_ci - date_time
+  ) 
+
+
+```
+```{r}
+time_until_booked <- mini_clicks %>%
+  mutate(date_time = date(date_time))%>%
+  group_by(user_id,srch_destination_id)%>%
+  summarize(max_time = max(date_time), min_time= min(date_time), diff_time = (max_time-min_time), booked = sum(is_booking), n=n())
+
+
+
+
+```
+

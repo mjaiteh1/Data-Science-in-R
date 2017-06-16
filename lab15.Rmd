@@ -1,0 +1,37 @@
+---
+title: "Lab15"
+author: "Mariama Jaiteh"
+date: "4/26/2017"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(macleish)
+```
+
+```{r}
+library(sp)
+SpatialLinesLengths(macleish_layers[["trails"]], longlat = TRUE)
+```
+
+```{r}
+library(rgeos)
+gArea(macleish_layers[["boundary"]])
+```
+##Use the spTransform() function and the proj4_aea string below to project the MacLeish boundary layers into an Albers Equal Area projection, which is area-preserving and in the units of meters.
+```{r}
+proj4_aea <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+macleish_layers[["boundary"]] %>%
+  spTransform(CRS(proj4_aea)) %>%
+  gBuffer(width = 10) %>%
+  spTransform(CRS("+init=epsg:4326"))
+```
+
+```{r}
+
+
+
+
+```
+

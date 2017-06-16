@@ -1,0 +1,176 @@
+---
+title: "sql"
+author: "Mariama Jaiteh"
+date: "4/1/2017"
+output: html_document
+---
+##Install packages
+```{r}
+install.packages("mdsr")
+install.packages("RMySQL")
+
+```
+
+## Connecting to MySQL
+```{r}
+library(mdsr)
+library(RMySQL)
+db <- dbConnect_scidb(dbname = "imdb")
+```
+
+```{r}
+class(db)
+```
+
+```{r}
+db %>%
+  dbGetQuery("SELECT * FROM kind_type;")
+```
+```{r}
+info_types <- db %>%
+  dbGetQuery("SELECT * FROM info_type")
+head(info_types)
+
+
+
+```
+
+```{r}
+db %>%
+  dbGetQuery("SELECT *
+              FROM title
+              WHERE title = 'The Empire Strikes Back';")
+
+```
+```{r}
+db %>%
+  dbGetQuery("SELECT *
+              FROM title
+              WHERE title LIKE '%The Empire Strikes Back%'
+                AND kind_id = 1;")
+
+
+```
+
+```{r}
+sql <- "
+SELECT t.title, t.production_year
+FROM title t 
+WHERE t.title LIKE '%The Empire Strikes Back%'
+  AND t.kind_id = 1
+ORDER BY production_year;
+"
+db %>%
+  dbGetQuery(sql)
+
+```
+## My Favorite movie
+```{r}
+db %>%
+  dbGetQuery("SELECT *
+              FROM title
+              WHERE title = 'The Fosters';")
+
+
+
+```
+##Person's id: Viola Davis
+```{r}
+db %>%
+  dbGetQuery("SELECT *
+              FROM name
+              WHERE name = 'Davis, Viola'
+              AND imdb_index = 'I';
+             ")
+
+
+
+```
+
+```{r}
+db %>%
+  dbGetQuery("SELECT *
+              FROM cast_info
+              WHERE movie_id = 2845501;")
+
+
+
+```
+
+```{r}
+db %>%
+  dbGetQuery("SELECT*
+              FROM cast_info ci
+              JOIN name n ON n.id = ci.person_id
+              WHERE person_id = 2845501;")
+
+
+
+
+
+```
+
+```{r}
+db %>%
+  dbGetQuery("SELECT n.name, ci.role_id
+              FROM cast_info ci
+              JOIN name n ON n.id = ci.person_id
+              WHERE movie_id = 2845501;")
+
+
+
+
+
+
+```
+
+# Homework # 4 - Question 1
+```{r}
+
+films <- db %>% 
+  dbGetQuery("SELECT production_year, COUNT(*) as num_films
+FROM imdb.title
+WHERE kind_id = 1
+GROUP BY production_year;")
+
+
+
+```
+# Homework # 4 - Question 2
+```{r}
+west_films <- db %>% 
+  dbGetQuery("SELECT production_year, COUNT(*) as western_films
+FROM imdb.movie_info
+JOIN title ON movie_info.movie_id = title.id 
+WHERE info_type_id = 3
+AND info LIKE '%Western%'
+AND kind_id = 1
+GROUP BY production_year;")
+
+
+
+
+```
+
+# Homework # 4 - Question 3
+```{r}
+
+movies <- films %>%
+  left_join(west_films, by="production_year")
+
+na.zero <- function (x) {
+    x[is.na(x)] <- 0
+    return(x)
+}
+
+movies <- na.zero(movies)
+
+movies <- movies[-c(1,139,140,141,142,143,144), ]
+
+```
+
+# Homework # 4 - Question 4
+```{r}
+ggplot(movies, aes(x=production_year,y=(western_films/num_films)*100)) + geom_line() + xlab("Year") + ylab("Percentage of Western Movies")
+```
+
